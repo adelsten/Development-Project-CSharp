@@ -1,0 +1,65 @@
+﻿@page
+@model Interview.Web.Pages.CategoriesModel
+@{
+}
+
+<h1 class="display-4">Categories</h1>
+<button class="btn btn-primary" data-toggle="modal" data-target="#category-modal">New Category</button>
+
+<ul class="results mt-3"></ul>
+<partial name="_CategoryModal" model="new Category()" />
+
+@section scripts {
+    <script>
+        const list = document.querySelector('ul.results');
+        const getAll = document.getElementById('save-category');
+
+        getAll.addEventListener('click', () => {
+            saveCategory();
+        });
+
+        window.onload = function () {
+            showCategories();
+        }
+
+
+        const showCategories = () => {
+            list.innerHTML = '';
+            fetch("/api/v1/categories")
+                .then(response => response.json())
+                .then(categories => {
+                    for (let i = 0; i < categories.length; i++) {
+                        let item = document.createElement('li');
+                        item.innerText = `${categories[i].instanceId} ${categories[i].name}, ${categories[i].description}`;
+                        // item.classList.add('edit-car');
+                        // item.dataset.id = cars[i].id;
+                        // item.dataset.bsToggle = 'modal';
+                        // item.dataset.bsTarget = '#car-modal';
+                        // item.addEventListener('click', (event) => {
+                        //     getCar(event.target.dataset.id);
+                        // });
+                        list.appendChild(item);
+                    }
+                });
+        }
+
+        const saveCategory = () => {
+            var product = {
+                Name: document.getElementById('Name').value,
+                Description: document.getElementById('Description').value,
+            }
+            fetch('/api/v1/categories/AddCategory', {
+                method: 'post',
+                headers: {
+                    "Content-type": "application/json",
+                },
+                body: JSON.stringify(product),
+            })
+                .then(response => response.json())
+            .then(body =>{
+                    showCategories()
+            })
+        }
+    </script>
+}
+

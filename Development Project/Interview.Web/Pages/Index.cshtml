@@ -1,0 +1,73 @@
+﻿@page
+@model Interview.Web.Pages.IndexModel
+@{
+}
+
+<h1 class="display-4">Products</h1>
+<button class="btn btn-primary" data-toggle="modal" data-target="#product-modal">New Product</button>
+<ul class="results mt-3"></ul>
+<partial name="_ProductModal" model="new Product()" />
+
+@section scripts {
+    <script>
+        const list = document.querySelector('ul.results');
+        const getAll = document.getElementById('get-Categories');
+        const saveButton = document.getElementById('save-product');
+        const categoryList = document.getElementById('category-select');
+
+        window.onload = function(){
+            showProducts();
+            getCategories();
+
+        }
+
+        saveButton.addEventListener('click', () => {
+            SaveProduct();
+        });
+
+        const showProducts = () => {
+            list.innerHTML = '';
+            fetch("/api/v1/products")
+                .then(response => response.json())
+                .then(products => {
+                    for (let i = 0; i < products.length; i++) {
+                        let item = document.createElement('li');
+                        item.innerText = `${products[i].instanceId} ${products[i].name}, ${products[i].description}`;
+                        list.appendChild(item);
+                    }
+                });
+        }
+
+        const getCategories = () => {
+            categoryList.innerHTML = '';
+            fetch("/api/v1/categories")
+                .then(response => response.json())
+                .then(categories => {
+                    $('#category-select').selectpicker('destroy');
+                    for (let i = 0; i < categories.length; i++) {
+                        let item = document.createElement('option');
+                        item.value = `${categories[i].instanceId}`;
+                        item.innerText = `${categories[i].name}`;
+                        categoryList.appendChild(item);
+                    }
+                    $('#category-select').selectpicker();
+                });
+        }
+
+        const SaveProduct = () =>{
+            var product = {
+                Name: document.getElementById('Name').value,
+                Description: document.getElementById('Description').value,
+                ProductImageUris: document.getElementById('ProductImageUris').value,
+                SKU: document.getElementById('SKU').value,
+            }
+            fetch('/api/v1/products/AddProduct', {
+                method: 'post',
+                headers: {
+                    "Content-type": "application/json",
+                },
+                body: JSON.stringify(product),
+            });
+        }
+    </script>
+}

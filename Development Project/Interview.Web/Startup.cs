@@ -4,6 +4,10 @@ using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Sparcpoint;
+using Sparcpoint.Abstract;
+using Sparcpoint.Services;
+using Sparcpoint.SqlServer.Abstractions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,7 +27,16 @@ namespace Interview.Web
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddRazorPages();
             services.AddControllers();
+            services.AddSingleton<IDataSerializer, JsonDataSerializer>();
+            services.AddSingleton<IProductService, ProductService>();
+            services.AddSingleton<ICategoryService, CategoryService>();
+            services.AddSingleton<ISqlExecutor, SqlServerExecutor>(services =>
+            {
+                var connectionString = Configuration["ConnectionStrings:DefaultConnection"];
+                return new SqlServerExecutor(connectionString);
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -50,6 +63,7 @@ namespace Interview.Web
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                endpoints.MapRazorPages();
             });
         }
     }
